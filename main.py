@@ -100,7 +100,7 @@ def new_section(max_length, max_width):
 
     st.pyplot(image)
 
-st.header('Введите размеры земельного участка')
+st.header('Размеры пятна застройки')
 
 # Устанавливаем случайные значения по умолчанию с округлением до двух знаков после запятой
 if 'length' not in st.session_state:
@@ -111,8 +111,38 @@ if 'width' not in st.session_state:
 
 # Виджеты для ввода длины и ширины участка с использованием сохраненных значений
 # Формат '%.2f' обеспечивает вывод с точностью до двух знаков после запятой
-length = st.number_input('Длина участка (м):', min_value=0.0, format='%.2f', value=st.session_state['length'])
-width = st.number_input('Ширина участка (м):', min_value=0.0, format='%.2f', value=st.session_state['width'])
+length = st.number_input('Длина (м):', min_value=0.0, format='%.2f', value=st.session_state['length'])
+width = st.number_input('Ширина (м):', min_value=0.0, format='%.2f', value=st.session_state['width'])
+
+# Устанавливаем ключи для различения виджетов ввода
+keys = ['one', 'two', 'three', 'studio']
+
+st.header('Целевое распределение')
+
+# Инициализация значений, если они ещё не установлены
+for key in keys:
+    if key not in st.session_state:
+        st.session_state[key] = 25.0  # начальное распределение
+
+# Функция-обработчик изменения значений, которая обновляет поля ввода
+def on_change():
+    total = 100.0
+    # Вычисляем сумму всех полей кроме последнего
+    current_total = sum(st.session_state[key] for key in keys[:-1])
+    # Обновляем последнее поле значением оставшегося процента
+    st.session_state[keys[-1]] = total - current_total
+
+# Сгруппируем виджеты в строку
+cols = st.columns(4)  # Создаем 4 колонки
+
+with cols[0]:
+    st.number_input('Однокомнатные (в %)', min_value=0.0, max_value=100.0, key=keys[0], on_change=on_change)
+with cols[1]:
+    st.number_input('Двухкомнатные (в %)', min_value=0.0, max_value=100.0, key=keys[1], on_change=on_change)
+with cols[2]:
+    st.number_input('Трехкомнатные (в %)', min_value=0.0, max_value=100.0, key=keys[2], on_change=on_change)
+with cols[3]:
+    st.number_input('Студии (в %)', min_value=0.0, max_value=100.0, key=keys[3], disabled=True)
 
 # Путь к файлу sections.json
 file_path = "sections.json"
